@@ -27,7 +27,7 @@ function App() {
       const { token, expired } = res.data;
       document.cookie = `hextoken=${token}; expires=${new Date(expired)};`;
       axios.defaults.headers.common['Authorization'] = token;
-      checkLogin();
+      setIsAuth(true);
       getProducts();
     } catch (error) {
       alert('登入失敗');
@@ -38,12 +38,41 @@ function App() {
   const checkLogin = async () => {
     try {
       await axios.post(`${VITE_APP_API_BASE}/api/user/check`);
-      alert('登入成功');
       setIsAuth(true);
+      getProducts();
     } catch (error) {
-      console.log('error');
+      document.cookie =
+        'hextoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      setIsAuth(false);
+      console.log('驗證失效，請重新登入');
     }
   };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${VITE_APP_API_BASE}/logout`);
+      document.cookie =
+        'hextoken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      delete axios.defaults.headers.common['Authorization'];
+      alert('登出成功');
+      setIsAuth(false);
+    } catch (error) {
+      console.error('登出失敗:', error);
+      alert('登出失敗');
+    }
+  };
+
+  useEffect(() => {
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('hextoken='))
+      ?.split('=')[1];
+
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = token;
+      checkLogin();
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { value, name } = e.target;
@@ -116,6 +145,13 @@ function App() {
                 )}
               </tbody>
             </table>
+            <button
+              type="button"
+              className="btn primary-bg"
+              onClick={handleLogout}
+            >
+              登出
+            </button>
           </div>
 
           <div
