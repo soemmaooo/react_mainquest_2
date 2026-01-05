@@ -70,7 +70,8 @@ function App() {
 
     if (token) {
       axios.defaults.headers.common['Authorization'] = token;
-      checkLogin();
+      setIsAuth(true);
+      getProducts();
     }
   }, []);
 
