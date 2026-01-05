@@ -25,7 +25,9 @@ function App() {
         formData
       );
       const { token, expired } = res.data;
-      document.cookie = `hextoken=${token}; expires=${new Date(expired)};`;
+      document.cookie = `hextoken=${token}; expires=${new Date(
+        expired
+      )}; path=/;`;
       axios.defaults.headers.common['Authorization'] = token;
       setIsAuth(true);
       getProducts();
